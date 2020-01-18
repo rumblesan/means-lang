@@ -1,5 +1,5 @@
-use crate::ops::Op;
-use crate::value::Value;
+use super::ops::Op;
+use super::value::Value;
 
 pub struct CodeBlock {
     pub code: Vec<Op>,

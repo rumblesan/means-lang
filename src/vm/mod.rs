@@ -1,7 +1,12 @@
-use crate::code_block::CodeBlock;
-use crate::ops::Op;
-use crate::value::Value;
-use crate::vm_error::VMError;
+pub mod code_block;
+pub mod error;
+pub mod ops;
+pub mod value;
+
+use code_block::CodeBlock;
+use error::VMError;
+use ops::Op;
+use value::Value;
 
 const VM_STACK_SIZE: usize = 100;
 
@@ -93,7 +98,7 @@ impl MeansVM {
                 Op::Negate => unary_op!(self, -),
                 Op::Constant(p) => match blk.constants.get(*p) {
                     None => {
-                        vm_error!(self, VMError::NoConstant);
+                        self.set_error(VMError::NoConstant);
                     }
                     Some(v) => {
                         println!("position: {:?}, value: {:?}", p, v);

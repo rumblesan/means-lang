@@ -1,12 +1,7 @@
-mod code_block;
-mod ops;
-mod value;
-mod vm;
-
-use code_block::CodeBlock;
-use ops::Op;
-use value::Value;
-use vm::MeansVM;
+use meanslang::vm::code_block::CodeBlock;
+use meanslang::vm::ops::Op;
+use meanslang::vm::value::Value;
+use meanslang::vm::MeansVM;
 
 fn main() {
     let mut blk = CodeBlock::create();
