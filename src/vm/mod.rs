@@ -14,6 +14,7 @@ pub struct MeansVM {
     pc: u32,
     exit_code: u32,
     error: VMError,
+    debug: bool,
     sc: usize,
     stack: [Value; VM_STACK_SIZE],
 }
@@ -79,13 +80,19 @@ impl MeansVM {
             pc: 0,
             exit_code: 0,
             error: VMError::NoError,
+            debug: false,
             sc: 0,
             stack: [Value::Number(0.0); VM_STACK_SIZE],
         }
     }
+    pub fn set_debug(&mut self, debug: bool) {
+        self.debug = debug;
+    }
     pub fn run(&mut self, blk: &mut CodeBlock) -> u32 {
-        for op in &blk.code {
-            println!("op -> {:?}", op);
+        for (idx, op) in (&blk.code).iter().enumerate() {
+            if self.debug {
+                println!("{} -> {:?}", idx, op);
+            }
             match op {
                 Op::Pop => {
                     decr_stack!(self);
@@ -101,14 +108,11 @@ impl MeansVM {
                         self.set_error(VMError::NoConstant);
                     }
                     Some(v) => {
-                        println!("position: {:?}, value: {:?}", p, v);
-                        self.stack[self.sc] = *v;
-                        incr_stack!(self);
+                        vm_push!(self, *v);
                     }
                 },
                 Op::Print => {
-                    decr_stack!(self);
-                    let v = self.stack[self.sc];
+                    vm_pop!(self, v);
                     println!("Printing {:?}", v);
                 }
             }
