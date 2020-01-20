@@ -1,9 +1,17 @@
+use meanslang::parser::lexer::{MeansLexer, Token};
 use meanslang::vm::code_block::CodeBlock;
 use meanslang::vm::ops::Op;
 use meanslang::vm::value::Value;
 use meanslang::vm::MeansVM;
 
 fn main() {
+    let l = MeansLexer::create();
+    let input = "3 + (4.0 * 5) - 2.134";
+    let tokens: Vec<Token> = l.tokenise(&input);
+    for t in &tokens {
+        println!("{:?}", t);
+    }
+
     let mut blk = CodeBlock::create();
     let n1 = blk.add_constant(Value::Number(10.0));
     let n2 = blk.add_constant(Value::Number(8.0));

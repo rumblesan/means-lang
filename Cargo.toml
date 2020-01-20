@@ -9,3 +9,4 @@ name = "meanslang"
 path = "src/lib.rs"
 
 [dependencies]
+regex = "1"
