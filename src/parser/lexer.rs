@@ -1,61 +1,29 @@
 use regex::Regex;
 
-#[derive(Debug, Clone)]
-pub enum TokenTag {
-    End,
-    OpenParen,
-    CloseParen,
-    Operator,
-    Number,
-}
-
-struct Matcher {
-    regex: Regex,
-    tag: TokenTag,
-    parse: bool,
-}
+use super::tokens;
+use super::tokens::{Token, TokenParser};
 
 pub struct MeansLexer {
-    matchers: Vec<Matcher>,
-}
-
-#[derive(Debug)]
-pub struct Token {
-    pub tag: TokenTag,
-    pub contents: String,
-    pub line: u64,
-    pub character: u64,
+    matchers: Vec<Box<dyn TokenParser>>,
 }
 
 impl MeansLexer {
     pub fn create() -> MeansLexer {
         let lexer = MeansLexer {
             matchers: vec![
-                Matcher {
-                    regex: Regex::new(r"^\s").unwrap(),
-                    tag: TokenTag::OpenParen,
-                    parse: false,
-                },
-                Matcher {
-                    regex: Regex::new(r"^\(").unwrap(),
-                    tag: TokenTag::OpenParen,
-                    parse: true,
-                },
-                Matcher {
-                    regex: Regex::new(r"^\)").unwrap(),
-                    tag: TokenTag::CloseParen,
-                    parse: true,
-                },
-                Matcher {
-                    regex: Regex::new(r"^[\+\-\*/%]").unwrap(),
-                    tag: TokenTag::Operator,
-                    parse: true,
-                },
-                Matcher {
-                    regex: Regex::new(r"^[0-9]+(\.[0-9]+)?").unwrap(),
-                    tag: TokenTag::Operator,
-                    parse: true,
-                },
+                tokens::WhiteSpaceMatcher::new(Regex::new(r"^\s").unwrap(), true),
+                tokens::SimpleTokenMatcher::new(
+                    Regex::new(r"^\(").unwrap(),
+                    Token::OpenParen,
+                    false,
+                ),
+                tokens::SimpleTokenMatcher::new(
+                    Regex::new(r"^\)").unwrap(),
+                    Token::CloseParen,
+                    false,
+                ),
+                tokens::OperatorTokenMatcher::new(Regex::new(r"^[\+\-\*/%]").unwrap(), false),
+                tokens::FloatTokenMatcher::new(Regex::new(r"^[0-9]+(\.[0-9]+)?").unwrap(), false),
             ],
         };
         lexer
@@ -63,26 +31,29 @@ impl MeansLexer {
     pub fn tokenise(&self, input: &str) -> Vec<Token> {
         let mut source = input;
         let mut tokens = Vec::new();
+        let mut matched = false;
         loop {
             if source.len() < 1 {
                 break;
             }
 
             for matcher in &self.matchers {
-                if matcher.regex.is_match(&source) {
-                    let m = matcher.regex.find(&source).unwrap();
+                if matcher.regex().is_match(&source) {
+                    matched = true;
+                    let m = matcher.regex().find(&source).unwrap();
                     let s = m.as_str();
-                    if matcher.parse {
-                        tokens.push(Token {
-                            tag: matcher.tag.clone(),
-                            contents: s.to_owned(),
-                            character: 0,
-                            line: 0,
-                        });
+                    if !matcher.skip() {
+                        let t = matcher.parse(m.as_str());
+                        println!("{:?}", t);
+                        tokens.push(t);
                     }
                     source = &source[s.len()..];
                 }
             }
+            if !matched {
+                println!("Matching Error!");
+            }
+            matched = false;
         }
         return tokens;
     }
