@@ -12,18 +12,10 @@ impl MeansLexer {
         let lexer = MeansLexer {
             matchers: vec![
                 tokens::WhiteSpaceMatcher::new(Regex::new(r"^\s").unwrap(), true),
-                tokens::SimpleTokenMatcher::new(
-                    Regex::new(r"^\(").unwrap(),
-                    Token::OpenParen,
-                    false,
-                ),
-                tokens::SimpleTokenMatcher::new(
-                    Regex::new(r"^\)").unwrap(),
-                    Token::CloseParen,
-                    false,
-                ),
+                tokens::SimpleTokenMatcher::open_paren(),
+                tokens::SimpleTokenMatcher::close_paren(),
                 tokens::OperatorTokenMatcher::new(Regex::new(r"^[\+\-\*/%]").unwrap(), false),
-                tokens::FloatTokenMatcher::new(Regex::new(r"^[0-9]+(\.[0-9]+)?").unwrap(), false),
+                tokens::FloatTokenMatcher::new(),
             ],
         };
         lexer

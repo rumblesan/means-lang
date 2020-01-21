@@ -7,6 +7,10 @@ pub enum Token {
     WhiteSpace,
     OpenParen,
     CloseParen,
+    OpenBrace,
+    CloseBrace,
+    OpenBracket,
+    CloseBracket,
     Operator(String),
     Number(f64),
     Identifier(String),
@@ -53,6 +57,48 @@ impl SimpleTokenMatcher {
             regex,
             output,
             skip,
+        })
+    }
+    pub fn open_paren() -> Box<SimpleTokenMatcher> {
+        Box::new(SimpleTokenMatcher {
+            regex: Regex::new(r"^\(").unwrap(),
+            output: Token::OpenParen,
+            skip: false,
+        })
+    }
+    pub fn close_paren() -> Box<SimpleTokenMatcher> {
+        Box::new(SimpleTokenMatcher {
+            regex: Regex::new(r"^\)").unwrap(),
+            output: Token::OpenParen,
+            skip: false,
+        })
+    }
+    pub fn open_brace() -> Box<SimpleTokenMatcher> {
+        Box::new(SimpleTokenMatcher {
+            regex: Regex::new(r"^{").unwrap(),
+            output: Token::OpenBrace,
+            skip: false,
+        })
+    }
+    pub fn close_brace() -> Box<SimpleTokenMatcher> {
+        Box::new(SimpleTokenMatcher {
+            regex: Regex::new(r"^}").unwrap(),
+            output: Token::CloseBrace,
+            skip: false,
+        })
+    }
+    pub fn open_bracket() -> Box<SimpleTokenMatcher> {
+        Box::new(SimpleTokenMatcher {
+            regex: Regex::new(r"^[").unwrap(),
+            output: Token::OpenBracket,
+            skip: false,
+        })
+    }
+    pub fn close_bracket() -> Box<SimpleTokenMatcher> {
+        Box::new(SimpleTokenMatcher {
+            regex: Regex::new(r"^]").unwrap(),
+            output: Token::CloseBracket,
+            skip: false,
         })
     }
 }
@@ -121,7 +167,9 @@ pub struct FloatTokenMatcher {
 }
 
 impl FloatTokenMatcher {
-    pub fn new(regex: Regex, skip: bool) -> Box<FloatTokenMatcher> {
+    pub fn new() -> Box<FloatTokenMatcher> {
+        let regex = Regex::new(r"^[0-9]+(\.[0-9]+)?").unwrap();
+        let skip = false;
         Box::new(FloatTokenMatcher { regex, skip })
     }
 }
