@@ -1,11 +1,11 @@
-use meanslang::parser::lexer::{MeansLexer, Token};
+use meanslang::parser::lexer::{new_lexer, Token};
 use meanslang::vm::code_block::CodeBlock;
 use meanslang::vm::ops::Op;
 use meanslang::vm::value::Value;
 use meanslang::vm::MeansVM;
 
 fn main() {
-    let l = MeansLexer::create();
+    let l = new_lexer();
     let input = r"foo = 3 + (4.0 * 5);
     bar = foo * 2 + 3;";
     println!("tokenising \n{}", input);
