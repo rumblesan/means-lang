@@ -11,6 +11,9 @@ pub enum Token {
     CloseBrace,
     OpenBracket,
     CloseBracket,
+    SemiColon,
+    Comma,
+    Assignment,
     Operator(String),
     Number(f64),
     Identifier(String),
@@ -28,7 +31,12 @@ pub struct WhiteSpaceMatcher {
 }
 
 impl WhiteSpaceMatcher {
-    pub fn new(regex: Regex, skip: bool) -> Box<WhiteSpaceMatcher> {
+    pub fn simple(skip: bool) -> Box<WhiteSpaceMatcher> {
+        let regex = Regex::new(r"^\s").unwrap();
+        Box::new(WhiteSpaceMatcher { regex, skip })
+    }
+    pub fn with_newlines(skip: bool) -> Box<WhiteSpaceMatcher> {
+        let regex = Regex::new(r"^[[:space:]]+").unwrap();
         Box::new(WhiteSpaceMatcher { regex, skip })
     }
 }
@@ -51,6 +59,19 @@ pub struct SimpleTokenMatcher {
     skip: bool,
 }
 
+fn gen_regex(symbol: &str) -> Regex {
+    let pattern = format!("^{}", regex::escape(symbol));
+    Regex::new(&pattern).unwrap()
+}
+
+fn constant(symbol: &str, output: Token, skip: bool) -> Box<SimpleTokenMatcher> {
+    Box::new(SimpleTokenMatcher {
+        regex: gen_regex(symbol),
+        output,
+        skip,
+    })
+}
+
 impl SimpleTokenMatcher {
     pub fn new(regex: Regex, output: Token, skip: bool) -> Box<SimpleTokenMatcher> {
         Box::new(SimpleTokenMatcher {
@@ -60,46 +81,31 @@ impl SimpleTokenMatcher {
         })
     }
     pub fn open_paren() -> Box<SimpleTokenMatcher> {
-        Box::new(SimpleTokenMatcher {
-            regex: Regex::new(r"^\(").unwrap(),
-            output: Token::OpenParen,
-            skip: false,
-        })
+        constant("(", Token::OpenParen, false)
     }
     pub fn close_paren() -> Box<SimpleTokenMatcher> {
-        Box::new(SimpleTokenMatcher {
-            regex: Regex::new(r"^\)").unwrap(),
-            output: Token::OpenParen,
-            skip: false,
-        })
+        constant(")", Token::CloseParen, false)
     }
     pub fn open_brace() -> Box<SimpleTokenMatcher> {
-        Box::new(SimpleTokenMatcher {
-            regex: Regex::new(r"^{").unwrap(),
-            output: Token::OpenBrace,
-            skip: false,
-        })
+        constant("{", Token::OpenBrace, false)
     }
     pub fn close_brace() -> Box<SimpleTokenMatcher> {
-        Box::new(SimpleTokenMatcher {
-            regex: Regex::new(r"^}").unwrap(),
-            output: Token::CloseBrace,
-            skip: false,
-        })
+        constant("}", Token::CloseBrace, false)
     }
     pub fn open_bracket() -> Box<SimpleTokenMatcher> {
-        Box::new(SimpleTokenMatcher {
-            regex: Regex::new(r"^[").unwrap(),
-            output: Token::OpenBracket,
-            skip: false,
-        })
+        constant("[", Token::OpenBracket, false)
     }
     pub fn close_bracket() -> Box<SimpleTokenMatcher> {
-        Box::new(SimpleTokenMatcher {
-            regex: Regex::new(r"^]").unwrap(),
-            output: Token::CloseBracket,
-            skip: false,
-        })
+        constant("]", Token::CloseBracket, false)
+    }
+    pub fn semicolon() -> Box<SimpleTokenMatcher> {
+        constant(";", Token::SemiColon, false)
+    }
+    pub fn comma() -> Box<SimpleTokenMatcher> {
+        constant(",", Token::Comma, false)
+    }
+    pub fn assignment() -> Box<SimpleTokenMatcher> {
+        constant("=", Token::Assignment, false)
     }
 }
 
