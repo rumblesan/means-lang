@@ -1,5 +1,4 @@
-use meanslang::parser::lexer::MeansLexer;
-use meanslang::parser::tokens::Token;
+use meanslang::parser::lexer::{MeansLexer, Token};
 use meanslang::vm::code_block::CodeBlock;
 use meanslang::vm::ops::Op;
 use meanslang::vm::value::Value;

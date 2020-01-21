@@ -1,62 +1,85 @@
 use regex::Regex;
+use std::fmt::{Debug, Display};
 
-use super::tokens;
-use super::tokens::{Token, TokenParser};
+use super::tokens::{TokenData, TokenMatcher};
+
+pub type Token = TokenData<TokenTag>;
+
+#[derive(Debug, Clone)]
+pub enum TokenTag {
+    End,
+    WhiteSpace,
+    OpenParen,
+    CloseParen,
+    OpenBrace,
+    CloseBrace,
+    OpenBracket,
+    CloseBracket,
+    SemiColon,
+    Comma,
+    Assignment,
+    Operator,
+    Float,
+    Integer,
+    Number,
+    Identifier,
+}
 
 pub struct MeansLexer {
-    matchers: Vec<Box<dyn TokenParser>>,
+    matchers: Vec<TokenMatcher<TokenTag>>,
+}
+
+impl Display for TokenTag {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        Debug::fmt(self, f)
+    }
 }
 
 impl MeansLexer {
     pub fn create() -> MeansLexer {
-        let lexer = MeansLexer {
+        MeansLexer {
             matchers: vec![
-                tokens::WhiteSpaceMatcher::with_newlines(true),
-                tokens::SimpleTokenMatcher::open_paren(),
-                tokens::SimpleTokenMatcher::close_paren(),
-                tokens::SimpleTokenMatcher::open_brace(),
-                tokens::SimpleTokenMatcher::close_brace(),
-                tokens::SimpleTokenMatcher::open_bracket(),
-                tokens::SimpleTokenMatcher::close_bracket(),
-                tokens::SimpleTokenMatcher::semicolon(),
-                tokens::SimpleTokenMatcher::assignment(),
-                tokens::SimpleTokenMatcher::comma(),
-                tokens::OperatorTokenMatcher::new(Regex::new(r"^[\+\-\*/%]").unwrap(), false),
-                tokens::FloatTokenMatcher::new(),
-                tokens::IdentifierTokenMatcher::new(
+                TokenMatcher::whitespace_with_newlines(TokenTag::WhiteSpace),
+                TokenMatcher::constant("(", TokenTag::OpenParen),
+                TokenMatcher::constant(")", TokenTag::CloseParen),
+                TokenMatcher::constant("{", TokenTag::OpenBrace),
+                TokenMatcher::constant("}", TokenTag::CloseBrace),
+                TokenMatcher::constant("[", TokenTag::OpenBracket),
+                TokenMatcher::constant("]", TokenTag::CloseBracket),
+                TokenMatcher::constant(";", TokenTag::SemiColon),
+                TokenMatcher::constant("=", TokenTag::Assignment),
+                TokenMatcher::constant(",", TokenTag::Comma),
+                TokenMatcher::operators("+-*/%", TokenTag::Operator),
+                TokenMatcher::float(TokenTag::Float),
+                TokenMatcher::integer(TokenTag::Integer),
+                TokenMatcher::regex(
                     Regex::new(r"^[[:alpha:]][[:alnum:]]*").unwrap(),
-                    false,
+                    TokenTag::Identifier,
                 ),
             ],
-        };
-        lexer
+        }
     }
     pub fn tokenise(&self, input: &str) -> Vec<Token> {
         let mut source = input;
         let mut tokens = Vec::new();
-        let mut matched = false;
-        loop {
-            if source.len() < 1 {
-                break;
-            }
-
+        while source.len() > 0 {
+            let mut matched = false;
             for matcher in &self.matchers {
-                if matcher.regex().is_match(&source) {
+                if matcher.regex.is_match(&source) {
                     matched = true;
-                    let m = matcher.regex().find(&source).unwrap();
+                    let m = matcher.regex.find(&source).unwrap();
                     let s = m.as_str();
-                    if !matcher.skip() {
+                    if !matcher.skip {
                         let t = matcher.parse(m.as_str());
-                        println!("{:?}", t);
                         tokens.push(t);
                     }
                     source = &source[s.len()..];
                 }
             }
             if !matched {
+                source = &source[1..];
                 println!("Matching Error!");
             }
-            matched = false;
         }
         return tokens;
     }
