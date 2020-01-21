@@ -1,6 +1,7 @@
 use regex::Regex;
 use std::fmt::{Debug, Display};
 
+use super::position_tracker::PositionTracker;
 use super::tokens::{TokenData, TokenMatcher};
 
 pub type Token = TokenData<TokenTag>;
@@ -60,6 +61,7 @@ impl MeansLexer {
         }
     }
     pub fn tokenise(&self, input: &str) -> Vec<Token> {
+        let mut tracker = PositionTracker::new();
         let mut source = input;
         let mut tokens = Vec::new();
         while source.len() > 0 {
@@ -70,13 +72,15 @@ impl MeansLexer {
                     let m = matcher.regex.find(&source).unwrap();
                     let s = m.as_str();
                     if !matcher.skip {
-                        let t = matcher.parse(m.as_str());
+                        let t = matcher.parse(s, tracker.line, tracker.character);
                         tokens.push(t);
                     }
+                    tracker.consume(s);
                     source = &source[s.len()..];
                 }
             }
             if !matched {
+                tracker.consume(&source[..1]);
                 source = &source[1..];
                 println!("Matching Error!");
             }

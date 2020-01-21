@@ -6,7 +6,8 @@ use meanslang::vm::MeansVM;
 
 fn main() {
     let l = MeansLexer::create();
-    let input = "3 + (4.0 * 5) - 2.134";
+    let input = r"foo = 3 + (4.0 * 5);
+    bar = foo * 2 + 3;";
     println!("tokenising \n{}", input);
     let tokens: Vec<Token> = l.tokenise(&input);
     for t in &tokens {

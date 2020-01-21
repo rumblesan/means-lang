@@ -29,12 +29,12 @@ impl<T: Clone + Display> TokenMatcher<T> {
     pub fn new(regex: Regex, tag: T, skip: bool) -> TokenMatcher<T> {
         TokenMatcher { regex, tag, skip }
     }
-    pub fn parse(&self, contents: &str) -> TokenData<T> {
+    pub fn parse(&self, contents: &str, line: u64, character: u64) -> TokenData<T> {
         TokenData {
             tag: self.tag.clone(),
             contents: contents.to_owned(),
-            line: 0,
-            character: 0,
+            line,
+            character,
         }
     }
     pub fn regex(regex: Regex, tag: T) -> TokenMatcher<T> {
@@ -42,14 +42,11 @@ impl<T: Clone + Display> TokenMatcher<T> {
     }
     pub fn whitespace(tag: T) -> TokenMatcher<T> {
         let regex = Regex::new(r"^\s\t").unwrap();
-        TokenMatcher {
-            regex,
-            tag,
-            skip: true,
-        }
+        TokenMatcher::new(regex, tag, true)
     }
     pub fn whitespace_with_newlines(tag: T) -> TokenMatcher<T> {
-        TokenMatcher::new(Regex::new(r"^[[:space:]]+").unwrap(), tag, false)
+        let regex = Regex::new(r"^[[:space:]]+").unwrap();
+        TokenMatcher::new(regex, tag, true)
     }
     pub fn constant(symbol: &str, tag: T) -> TokenMatcher<T> {
         let pattern = format!("^{}", regex::escape(symbol));
