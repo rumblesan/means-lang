@@ -3,10 +3,10 @@ use std::fmt::Display;
 
 #[derive(Debug)]
 pub struct TokenData<T: Clone + Display> {
-    tag: T,
-    contents: String,
-    line: u64,
-    character: u64,
+    pub tag: T,
+    pub contents: String,
+    pub line: u64,
+    pub character: u64,
 }
 
 impl<T: Clone + Display> std::fmt::Display for TokenData<T> {
