@@ -1,12 +1,12 @@
 use regex::Regex;
 use std::fmt::{Debug, Display};
 
-use dass::lexer::DassLexer;
+use dass::lexer::DassLexerBuilder;
 use dass::tokens::{TokenData, TokenMatcher};
 
 pub type Token = TokenData<TokenTag>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TokenTag {
     End,
     WhiteSpace,
@@ -32,8 +32,8 @@ impl Display for TokenTag {
     }
 }
 
-pub fn new_lexer() -> DassLexer<TokenTag> {
-    DassLexer::create(vec![
+pub fn new_lexer_builder() -> DassLexerBuilder<TokenTag> {
+    DassLexerBuilder::new(vec![
         TokenMatcher::whitespace_with_newlines(TokenTag::WhiteSpace),
         TokenMatcher::constant("(", TokenTag::OpenParen),
         TokenMatcher::constant(")", TokenTag::CloseParen),

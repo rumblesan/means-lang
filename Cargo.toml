@@ -10,3 +10,4 @@ path = "src/lib.rs"
 
 [dependencies]
 regex = "1"
+dass = "0.2.0"

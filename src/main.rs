@@ -1,17 +1,32 @@
-use meanslang::parser::lexer::{new_lexer, Token};
+use meanslang::parser::lexer::new_lexer_builder;
+use meanslang::parser::MeansParser;
 use meanslang::vm::code_block::CodeBlock;
 use meanslang::vm::ops::Op;
 use meanslang::vm::value::Value;
 use meanslang::vm::MeansVM;
 
 fn main() {
-    let l = new_lexer();
-    let input = r"foo = 3 + (4.0 * 5);
-    bar = foo * 2 + 3;";
-    println!("tokenising \n{}", input);
-    let tokens: Vec<Token> = l.tokenise(&input);
-    for t in &tokens {
-        println!("{:?}", t);
+    let lb = new_lexer_builder();
+    let input = r"
+foo = 3  (4.0 * 5);
+bar = foo & 2 / 3;
+";
+    let lexer = lb.build(input);
+    for r in lexer.clone().by_ref() {
+        match r {
+            Ok(t) => println!("{}", t),
+            Err(e) => println!("{}", e),
+        }
+    }
+    let mut parser = MeansParser::new(lexer);
+    let output = parser.parse();
+    match output {
+        Ok(ast) => ast.pprint(),
+        Err(errors) => {
+            for e in &errors {
+                println!("could not parse token stream: {}", e);
+            }
+        }
     }
 
     let mut blk = CodeBlock::create();
