@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Op {
     Pop,
     Add,
@@ -9,4 +9,5 @@ pub enum Op {
     Negate,
     Constant(usize),
     Print,
+    Local(usize),
 }

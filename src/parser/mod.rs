@@ -9,7 +9,7 @@ use lexer::TokenTag;
 pub struct MeansParser<'a> {
     p: DassTokenParser<'a, TokenTag>,
 }
-//    pub fn build<'a>(&self, source: &'a str) -> DassLexer<'a, T> {
+
 impl<'a> MeansParser<'a> {
     pub fn new(lexer: DassLexer<'a, TokenTag>) -> Self {
         MeansParser {

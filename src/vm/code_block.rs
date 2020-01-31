@@ -1,6 +1,7 @@
 use super::ops::Op;
 use super::value::Value;
 
+#[derive(Clone, Debug)]
 pub struct CodeBlock {
     pub code: Vec<Op>,
     pub constants: Vec<Value>,

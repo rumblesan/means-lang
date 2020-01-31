@@ -88,8 +88,8 @@ impl MeansVM {
     pub fn set_debug(&mut self, debug: bool) {
         self.debug = debug;
     }
-    pub fn run(&mut self, blk: &mut CodeBlock) -> u32 {
-        for (idx, op) in (&blk.code).iter().enumerate() {
+    pub fn run(&mut self, blk: &CodeBlock) -> u32 {
+        for (idx, op) in blk.code.iter().enumerate() {
             if self.debug {
                 println!("{} -> {:?}", idx, op);
             }
@@ -111,6 +111,10 @@ impl MeansVM {
                         vm_push!(self, *v);
                     }
                 },
+                Op::Local(pos) => {
+                    let v = self.stack[*pos];
+                    vm_push!(self, v);
+                }
                 Op::Print => {
                     vm_pop!(self, v);
                     println!("Printing {:?}", v);
@@ -126,5 +130,9 @@ impl MeansVM {
 
     pub fn print_error(&self) {
         println!("ERROR: {:?} at {}", self.error, self.pc);
+    }
+
+    pub fn peek_stack(&self) -> Option<&Value> {
+        self.stack.get(self.sc)
     }
 }
